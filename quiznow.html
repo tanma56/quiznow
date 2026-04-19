@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>今何問目クイズDX 完全版</title>
+<style>
+body{
+    background:black;
+    color:#0ff;
+    font-family:sans-serif;
+    text-align:center;
+    margin:0;
+}
+
+/* ダブルタップズーム防止 */
+html, body {
+    touch-action: manipulation;
+}
+
+/* ボタンのズーム・選択防止 */
+button {
+    touch-action: manipulation;
+    user-select: none;
+}
+
+/* ←これ追加：キーパッド分の余白 */
+#game{
+    max-width:420px;
+    margin:auto;
+    padding-bottom:220px;
+}
+
+#question{
+    font-size:22px;
+    margin:10px;
+    color:#fff;
+}
+
+#answerDisplay{
+    font-size:32px;
+    color:yellow;
+    margin:10px;
+    min-height:40px;
+}
+
+/* ←ここが重要：固定キーパッド */
+.keypad{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    max-width:420px;
+    margin:auto;
+    right:0;
+
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+
+    background:#000;
+    padding:10px;
+    border-top:2px solid #0ff;
+}
+
+button{
+    padding:15px;
+    font-size:18px;
+    background:#111;
+    color:#0ff;
+    border:1px solid #0ff;
+}
+
+button:active{
+    background:#0ff;
+    color:black;
+}
+
+#result{
+    font-size:20px;
+    margin-top:10px;
+}
+
+#info{
+    margin:5px;
+
+}
+</style>
+</head>
+<body>
+
+<div id="game">
+<h2>今何問目クイズDX</h2>
+<div id="timer"></div>
+<div id="info"></div>
+<div id="question"></div>
+<div id="answerDisplay"></div>
+
+<div class="keypad">
+<button onclick="press(1)">1</button>
+<button onclick="press(2)">2</button>
+<button onclick="press(3)">3</button>
+<button onclick="press(4)">4</button>
+<button onclick="press(5)">5</button>
+<button onclick="press(6)">6</button>
+<button onclick="press(7)">7</button>
+<button onclick="press(8)">8</button>
+<button onclick="press(9)">9</button>
+<button onclick="clearInput()">C</button>
+<button onclick="press(0)">0</button>
+<button onclick="submitAnswer()">決定</button>
+</div>
+
+<div id="result"></div>
+</div>
+
+<script>
+let q=1, score=0, combo=0;
+let correct=0, input="";
+let time=60;
+let answering=true;
+let history=[];
+let usedAnswers=new Set(); // ←重複禁止管理
+let lastCorrect=null;
+let qStart, qTimer;
+
+// タイマー
+let mainTimer=setInterval(()=>{
+    time--;
+    document.getElementById("timer").textContent="残り "+time+" 秒";
+    if(time<=0) end();
+},1000);
+
+// 入力
+function press(n){
+    if(!answering)return;
+    input+=n;
+    showInput();
+}
+function clearInput(){input="";showInput();}
+function showInput(){
+    document.getElementById("answerDisplay").textContent=input;
+}
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
+// 問題生成（完全安全設計）
+function makeQ(){
+    answering=true;
+    input="";
+    showInput();
+    document.getElementById("result").textContent="";
+    qStart=Date.now();
+
+    let type;
+
+    if(q===1){
+        type=rand(0,1); // 今 or 先
+    }else{
+        let types=[0,1,2];
+        if(history.length>0) types.push(3);
+        type=types[rand(0,types.length-1)];
+    }
+
+    let tries=0;
+
+    while(true){
+        tries++;
+
+        if(type===0){
+            correct=q;
+            show("今何問目？");
+        }
+
+        if(type===1){
+            let n=rand(1,Math.min(20,q-1));
+            correct=q-n;
+            show(`${n}問前は何問目？`);
+        }
+
+        if(type===2){
+            let n=rand(1,20);
+            correct=q+n;
+            show(`${n}問先は何問目？`);
+        }
+
+        if(type===3){
+            let valid=history.filter(h=>h.answer>0 && !usedAnswers.has(h.answer));
+            if(valid.length===0){
+                type=0;
+                continue;
+            }
+            let p=valid[rand(0,valid.length-1)];
+            correct=p.question;
+            show(`「${p.answer}問目」と答えたのは何問目？`);
+        }
+
+        // 完全条件
+        if(correct>=1 && correct!==lastCorrect){
+            if(type!==3 || !usedAnswers.has(correct)){
+                break;
+            }
+        }
+
+        if(tries>30){
+            correct=q;
+            show("今何問目？");
+            break;
+        }
+    }
+
+    // 制限時間
+    qTimer=setTimeout(()=>{
+        if(answering){
+            answering=false;
+            combo=0;
+            showResult(`時間切れ！（${correct}）`);
+            saveHistory(correct);
+            next();
+        }
+    },5000);
+
+    updateInfo();
+}
+
+function show(t){
+    document.getElementById("question").textContent=`第${q}問：${t}`;
+}
+
+// 回答
+function submitAnswer(){
+    if(!answering)return;
+    answering=false;
+    clearTimeout(qTimer);
+
+    let user=Number(input);
+
+    if(user===correct){
+        combo++;
+        let speed=(5000-(Date.now()-qStart))/5000;
+        let add=Math.floor(100*(1+speed)*(1+combo*0.2));
+        score+=add;
+        showResult(`正解！ +${add}`);
+    }else{
+        combo=0;
+        showResult(`不正解（${correct}）`);
+    }
+
+    lastCorrect=correct;
+
+    if(user>0){
+        usedAnswers.add(user); // ←ここで重複防止
+    }
+
+    saveHistory(user>0?user:correct);
+
+    next();
+}
+
+function showResult(t){
+    document.getElementById("result").textContent=t;
+}
+
+// 履歴
+function saveHistory(ans){
+    history.push({question:q,answer:ans});
+}
+
+// 次
+function next(){
+    setTimeout(()=>{
+        q++;
+        if(time>0) makeQ();
+    },1000);
+}
+
+function updateInfo(){
+    document.getElementById("info").textContent=
+        `スコア:${score} コンボ:${combo}`;
+}
+
+function rank(){
+    if(score>2000)return"S";
+    if(score>1200)return"A";
+    if(score>600)return"B";
+    return"C";
+}
+
+function end(){
+    clearInterval(mainTimer);
+    clearTimeout(qTimer);
+    alert(`終了！\nスコア:${score}\nランク:${rank()}`);
+    location.reload();
+}
+
+makeQ();
+</script>
+
+</body>
+</html>
