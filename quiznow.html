@@ -4,38 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>今何問目クイズDX 完全版</title>
+
 <style>
 body{
+    margin:0;
     background:black;
     color:#0ff;
     font-family:sans-serif;
     text-align:center;
-    margin:0;
 }
 
-/* 共通 */
+#startScreen{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
 #game{
     max-width:420px;
     margin:auto;
+    padding-bottom:220px;
 }
 
-#question{
-    font-size:22px;
-    margin:10px;
-    color:#fff;
-}
-
-#answerDisplay{
-    font-size:32px;
-    color:yellow;
-    margin:10px;
-    min-height:40px;
-}
+#question{font-size:22px;color:#fff;margin:10px;}
+#answerDisplay{font-size:32px;color:yellow;min-height:40px;}
 
 .keypad{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    max-width:420px;
+    margin:auto;
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:6px;
+    background:#000;
+    padding:10px;
 }
 
 button{
@@ -44,106 +51,21 @@ button{
     background:#111;
     color:#0ff;
     border:1px solid #0ff;
+    touch-action:manipulation;
 }
+button:active{background:#0ff;color:black;}
 
-button:active{
-    background:#0ff;
-    color:black;
-}
-
-#result{
-    font-size:20px;
-    margin-top:10px;
-}
-
-#info{
-    margin:5px;
-}
-
-/* =========================
-   スマホ（〜768px）
-========================= */
-@media (max-width: 768px){
-
-    #game{
-        padding-bottom:220px;
-    }
-
-    .keypad{
-        position:fixed;
-        bottom:0;
-        left:0;
-        right:0;
-        max-width:420px;
-        margin:auto;
-        background:#000;
-        padding:10px;
-        border-top:2px solid #0ff;
-    }
-}
-
-/* =========================
-   タブレット（769px〜1024px）
-========================= */
-@media (min-width: 769px) and (max-width: 1024px){
-
-    #game{
-        max-width:500px;
-    }
-
-    .keypad{
-        position:static;
-        margin-top:20px;
-    }
-
-    button{
-        padding:18px;
-        font-size:20px;
-    }
-}
-
-/* =========================
-   PC（1025px以上）
-========================= */
-@media (min-width: 1025px){
-
-    #game{
-        max-width:600px;
-        margin-top:40px;
-    }
-
-    .keypad{
-        position:static;
-        margin-top:20px;
-        grid-template-columns:repeat(3,120px);
-        justify-content:center;
-    }
-
-    button{
-        padding:20px;
-        font-size:20px;
-    }
-
-　　html, body {
-    touch-action: manipulation;
-    overscroll-behavior: none;
-}
-
-/* ボタンのズーム・長押し防止 */
-button {
-    touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-}
-    
-}
 </style>
 </head>
+
 <body>
 
-<div id="game">
-<h2>今何問目クイズDX</h2>
+<div id="startScreen">
+<h1>今何問目クイズDX</h1>
+<button onclick="startGame()">スタート</button>
+</div>
+
+<div id="game" style="display:none;">
 <div id="timer"></div>
 <div id="info"></div>
 <div id="question"></div>
@@ -168,23 +90,35 @@ button {
 </div>
 
 <script>
+// ===== 基本変数 =====
 let q=1, score=0, combo=0;
 let correct=0, input="";
 let time=60;
-let answering=true;
 let history=[];
-let usedAnswers=new Set(); // ←重複禁止管理
+let usedAnswers=new Set();
 let lastCorrect=null;
-let qStart, qTimer;
+let lastType=null;
+let answering=true;
+let qStart,qTimer,mainTimer;
 
-// タイマー
-let mainTimer=setInterval(()=>{
-    time--;
-    document.getElementById("timer").textContent="残り "+time+" 秒";
-    if(time<=0) end();
-},1000);
+// ===== スタート =====
+function startGame(){
+    document.getElementById("startScreen").style.display="none";
+    document.getElementById("game").style.display="block";
+    startTimer();
+    makeQ();
+}
 
-// 入力
+// ===== タイマー =====
+function startTimer(){
+    mainTimer=setInterval(()=>{
+        time--;
+        document.getElementById("timer").textContent="残り "+time+" 秒";
+        if(time<=0) end();
+    },1000);
+}
+
+// ===== 入力 =====
 function press(n){
     if(!answering)return;
     input+=n;
@@ -195,9 +129,10 @@ function showInput(){
     document.getElementById("answerDisplay").textContent=input;
 }
 
+// ===== ランダム =====
 function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 
-// 問題生成（完全安全設計）
+// ===== 問題生成 =====
 function makeQ(){
     answering=true;
     input="";
@@ -205,64 +140,79 @@ function makeQ(){
     document.getElementById("result").textContent="";
     qStart=Date.now();
 
-    let type;
+    let types=[];
 
     if(q===1){
-        type=rand(0,1); // 今 or 先
+        types=[0,2];
     }else{
-        let types=[0,1,2];
+        types=[0,1,2];
         if(history.length>0) types.push(3);
-        type=types[rand(0,types.length-1)];
+        if(q>=6) types.push(4,5);
     }
 
     let tries=0;
 
     while(true){
         tries++;
+        let type=types[rand(0,types.length-1)];
+        if(type===lastType) continue;
+
+        let tempCorrect;
 
         if(type===0){
-            correct=q;
+            tempCorrect=q;
             show("今何問目？");
         }
 
         if(type===1){
             let n=rand(1,Math.min(20,q-1));
-            correct=q-n;
+            tempCorrect=q-n;
             show(`${n}問前は何問目？`);
         }
 
         if(type===2){
             let n=rand(1,20);
-            correct=q+n;
+            tempCorrect=q+n;
             show(`${n}問先は何問目？`);
         }
 
         if(type===3){
             let valid=history.filter(h=>h.answer>0 && !usedAnswers.has(h.answer));
-            if(valid.length===0){
-                type=0;
-                continue;
-            }
+            if(valid.length===0) continue;
             let p=valid[rand(0,valid.length-1)];
-            correct=p.question;
+            tempCorrect=p.question;
             show(`「${p.answer}問目」と答えたのは何問目？`);
         }
 
-        // 完全条件
-        if(correct>=1 && correct!==lastCorrect){
-            if(type!==3 || !usedAnswers.has(correct)){
-                break;
-            }
+        if(type===4){
+            let a=rand(1,Math.min(20,q-1));
+            let b=rand(1,20);
+            tempCorrect=q-a+b;
+            if(tempCorrect<1) continue;
+            show(`${a}問前の${b}問後は何問目？`);
         }
 
-        if(tries>30){
+        if(type===5){
+            let a=rand(1,20);
+            let b=rand(1,Math.min(20,q+a-1));
+            tempCorrect=q+a-b;
+            if(tempCorrect<1) continue;
+            show(`${a}問後の${b}問前は何問目？`);
+        }
+
+        if(tempCorrect>=1 && tempCorrect!==lastCorrect){
+            correct=tempCorrect;
+            lastType=type;
+            break;
+        }
+
+        if(tries>40){
             correct=q;
             show("今何問目？");
             break;
         }
     }
 
-    // 制限時間
     qTimer=setTimeout(()=>{
         if(answering){
             answering=false;
@@ -280,7 +230,7 @@ function show(t){
     document.getElementById("question").textContent=`第${q}問：${t}`;
 }
 
-// 回答
+// ===== 回答 =====
 function submitAnswer(){
     if(!answering)return;
     answering=false;
@@ -300,37 +250,20 @@ function submitAnswer(){
     }
 
     lastCorrect=correct;
-
-    if(user>0){
-        usedAnswers.add(user); // ←ここで重複防止
-    }
-
+    if(user>0) usedAnswers.add(user);
     saveHistory(user>0?user:correct);
 
     next();
 }
 
-    // ダブルタップズーム完全防止
-let lastTouchEnd = 0;
-
-document.addEventListener('touchend', function (event) {
-    let now = new Date().getTime();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
-
 function showResult(t){
     document.getElementById("result").textContent=t;
 }
 
-// 履歴
 function saveHistory(ans){
     history.push({question:q,answer:ans});
 }
 
-// 次
 function next(){
     setTimeout(()=>{
         q++;
@@ -357,7 +290,13 @@ function end(){
     location.reload();
 }
 
-makeQ();
+// ダブルタップ防止
+let lastTouchEnd=0;
+document.addEventListener('touchend',e=>{
+    let now=Date.now();
+    if(now-lastTouchEnd<=300)e.preventDefault();
+    lastTouchEnd=now;
+},false);
 </script>
 
 </body>
