@@ -6,47 +6,81 @@
 <title>今何問目クイズDX 完全版</title>
 
 <style>
+/* =========================
+   基本設定
+========================= */
 body{
     margin:0;
     background:black;
     color:#0ff;
     font-family:sans-serif;
+    overflow-x:hidden; /* ←横スクロール防止 */
 }
 
-/* コンテナ */
+/* =========================
+   スタート画面（常に中央）
+========================= */
+#startScreen{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+/* =========================
+   ゲーム画面
+========================= */
 #game{
     width:100%;
     max-width:600px;
     margin:0 auto;
-    padding:20px 15px 40px;
+    padding:20px;
+    box-sizing:border-box;
 }
 
-/* タイトル・情報 */
-#timer,#info{
-    margin:5px 0;
+/* =========================
+   上部UI（左上固定）
+========================= */
+#timer{
+    position:fixed;
+    top:10px;
+    left:10px;
+    font-size:26px; /* ←大きく */
+    font-weight:bold;
 }
 
-/* 問題 */
+#info{
+    position:fixed;
+    top:45px;
+    left:10px;
+    font-size:16px;
+}
+
+/* =========================
+   問題・入力
+========================= */
 #question{
     font-size:22px;
     color:#fff;
-    margin:15px 0;
+    margin-top:80px;
 }
 
-/* 入力表示 */
 #answerDisplay{
     font-size:32px;
     color:yellow;
     min-height:40px;
-    margin-bottom:15px;
+    margin:15px 0;
 }
 
-/* キーパッド */
+/* =========================
+   キーパッド（基本）
+========================= */
 .keypad{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:8px;
-    margin-top:10px;
+    width:100%;
 }
 
 /* ボタン */
@@ -65,24 +99,41 @@ button:active{
     color:black;
 }
 
-/* 結果 */
-#result{
-    margin-top:10px;
-    font-size:18px;
+/* =========================
+   スマホ（〜768px）
+========================= */
+@media (max-width:768px){
+
+    #game{
+        padding-top:100px;
+    }
+
+    .keypad{
+        position:fixed;
+        bottom:15%; /* ←下すぎない位置 */
+        left:0;
+        right:0;
+        max-width:420px;
+        margin:auto;
+    }
 }
 
 /* =========================
-   タブレット
+   タブレット（769px〜1024px）
 ========================= */
-@media (min-width:768px){
+@media (min-width:769px) and (max-width:1024px){
 
     #game{
-        max-width:720px;
-        padding:30px 40px;
+        padding-top:120px;
     }
 
-    #question{
-        font-size:24px;
+    .keypad{
+        position:fixed;
+        bottom:20%; /* ←少し上 */
+        left:0;
+        right:0;
+        max-width:500px;
+        margin:auto;
     }
 
     button{
@@ -92,9 +143,9 @@ button:active{
 }
 
 /* =========================
-   PC
+   PC（1025px以上）
 ========================= */
-@media (min-width:1024px){
+@media (min-width:1025px){
 
     body{
         display:flex;
@@ -103,12 +154,18 @@ button:active{
 
     #game{
         margin-left:60px;
-        max-width:800px;
+        padding-top:120px;
     }
 
     .keypad{
+        position:static;
+        margin-top:30px;
         grid-template-columns:repeat(3,120px);
-        justify-content:start;
+    }
+
+    button{
+        font-size:20px;
+        padding:18px;
     }
 }
     
