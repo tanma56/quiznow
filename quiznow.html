@@ -11,145 +11,104 @@ body{
     background:black;
     color:#0ff;
     font-family:sans-serif;
-    text-align:center;
-
-    /* ←ここ重要：縦中央 */
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
 }
 
-/* スタート画面 */
-#startScreen{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
-
-/* ゲーム全体 */
+/* コンテナ */
 #game{
     width:100%;
-    max-width:420px;
-
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-
-    gap:10px;
+    max-width:600px;
+    margin:0 auto;
+    padding:20px 15px 40px;
 }
 
-/* テキスト系 */
+/* タイトル・情報 */
+#timer,#info{
+    margin:5px 0;
+}
+
+/* 問題 */
 #question{
     font-size:22px;
     color:#fff;
+    margin:15px 0;
 }
 
+/* 入力表示 */
 #answerDisplay{
     font-size:32px;
     color:yellow;
     min-height:40px;
+    margin-bottom:15px;
 }
 
-/* キーパッド基本 */
+/* キーパッド */
 .keypad{
     display:grid;
     grid-template-columns:repeat(3,1fr);
-    gap:6px;
-    width:100%;
+    gap:8px;
+    margin-top:10px;
 }
 
 /* ボタン */
 button{
-    padding:15px;
+    padding:16px;
     font-size:18px;
     background:#111;
     color:#0ff;
     border:1px solid #0ff;
+    border-radius:6px;
     touch-action:manipulation;
 }
+
 button:active{
     background:#0ff;
     color:black;
 }
 
-/* =========================
-   スマホ（〜768px）
-========================= */
-@media (max-width:768px){
-
-    body{
-        align-items:flex-start;
-    }
-
-    #game{
-        margin-top:20px;
-        padding-bottom:220px;
-    }
-
-    .keypad{
-        position:fixed;
-        bottom:0;
-        left:0;
-        right:0;
-        max-width:420px;
-        margin:auto;
-        background:#000;
-        padding:10px;
-        border-top:2px solid #0ff;
-    }
+/* 結果 */
+#result{
+    margin-top:10px;
+    font-size:18px;
 }
 
 /* =========================
-   タブレット（769px〜1024px）
+   タブレット
 ========================= */
-@media (min-width:769px) and (max-width:1024px){
-
-    body{
-        align-items:center;
-    }
+@media (min-width:768px){
 
     #game{
-        max-width:500px;
+        max-width:720px;
+        padding:30px 40px;
     }
 
-    .keypad{
-        position:static;
-        margin-top:20px;
+    #question{
+        font-size:24px;
     }
 
     button{
+        font-size:20px;
         padding:18px;
-        font-size:20px;
     }
 }
 
 /* =========================
-   PC（1025px以上）
+   PC
 ========================= */
-@media (min-width:1025px){
+@media (min-width:1024px){
 
     body{
-        align-items:center;
+        display:flex;
+        justify-content:flex-start;
     }
 
     #game{
-        max-width:600px;
+        margin-left:60px;
+        max-width:800px;
     }
 
     .keypad{
-        position:static;
-        margin-top:20px;
         grid-template-columns:repeat(3,120px);
-        justify-content:center;
-    }
-
-    button{
-        padding:20px;
-        font-size:20px;
+        justify-content:start;
     }
 }
     
