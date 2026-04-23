@@ -12,39 +12,57 @@ body{
     color:#0ff;
     font-family:sans-serif;
     text-align:center;
+
+    /* ←ここ重要：縦中央 */
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
 }
 
+/* スタート画面 */
 #startScreen{
-    height:100vh;
     display:flex;
     flex-direction:column;
     justify-content:center;
     align-items:center;
+    height:100vh;
 }
 
+/* ゲーム全体 */
 #game{
+    width:100%;
     max-width:420px;
-    margin:auto;
-    padding-bottom:220px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    gap:10px;
 }
 
-#question{font-size:22px;color:#fff;margin:10px;}
-#answerDisplay{font-size:32px;color:yellow;min-height:40px;}
+/* テキスト系 */
+#question{
+    font-size:22px;
+    color:#fff;
+}
 
+#answerDisplay{
+    font-size:32px;
+    color:yellow;
+    min-height:40px;
+}
+
+/* キーパッド基本 */
 .keypad{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    max-width:420px;
-    margin:auto;
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:6px;
-    background:#000;
-    padding:10px;
+    width:100%;
 }
 
+/* ボタン */
 button{
     padding:15px;
     font-size:18px;
@@ -53,14 +71,22 @@ button{
     border:1px solid #0ff;
     touch-action:manipulation;
 }
-button:active{background:#0ff;color:black;}
+button:active{
+    background:#0ff;
+    color:black;
+}
 
 /* =========================
    スマホ（〜768px）
 ========================= */
-@media (max-width: 768px){
+@media (max-width:768px){
+
+    body{
+        align-items:flex-start;
+    }
 
     #game{
+        margin-top:20px;
         padding-bottom:220px;
     }
 
@@ -80,17 +106,19 @@ button:active{background:#0ff;color:black;}
 /* =========================
    タブレット（769px〜1024px）
 ========================= */
-@media (min-width: 769px) and (max-width: 1024px){
+@media (min-width:769px) and (max-width:1024px){
+
+    body{
+        align-items:center;
+    }
 
     #game{
         max-width:500px;
-        padding-bottom:0;
     }
 
     .keypad{
         position:static;
         margin-top:20px;
-        max-width:none;
     }
 
     button{
@@ -102,12 +130,14 @@ button:active{background:#0ff;color:black;}
 /* =========================
    PC（1025px以上）
 ========================= */
-@media (min-width: 1025px){
+@media (min-width:1025px){
+
+    body{
+        align-items:center;
+    }
 
     #game{
         max-width:600px;
-        margin-top:40px;
-        padding-bottom:0;
     }
 
     .keypad{
