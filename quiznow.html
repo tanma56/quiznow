@@ -123,6 +123,20 @@ button:active{
         padding:20px;
         font-size:20px;
     }
+
+　　html, body {
+    touch-action: manipulation;
+    overscroll-behavior: none;
+}
+
+/* ボタンのズーム・長押し防止 */
+button {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+    
 }
 </style>
 </head>
@@ -295,6 +309,17 @@ function submitAnswer(){
 
     next();
 }
+
+    // ダブルタップズーム完全防止
+let lastTouchEnd = 0;
+
+document.addEventListener('touchend', function (event) {
+    let now = new Date().getTime();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
 
 function showResult(t){
     document.getElementById("result").textContent=t;
