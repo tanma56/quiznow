@@ -55,6 +55,74 @@ button{
 }
 button:active{background:#0ff;color:black;}
 
+/* =========================
+   スマホ（〜768px）
+========================= */
+@media (max-width: 768px){
+
+    #game{
+        padding-bottom:220px;
+    }
+
+    .keypad{
+        position:fixed;
+        bottom:0;
+        left:0;
+        right:0;
+        max-width:420px;
+        margin:auto;
+        background:#000;
+        padding:10px;
+        border-top:2px solid #0ff;
+    }
+}
+
+/* =========================
+   タブレット（769px〜1024px）
+========================= */
+@media (min-width: 769px) and (max-width: 1024px){
+
+    #game{
+        max-width:500px;
+        padding-bottom:0;
+    }
+
+    .keypad{
+        position:static;
+        margin-top:20px;
+        max-width:none;
+    }
+
+    button{
+        padding:18px;
+        font-size:20px;
+    }
+}
+
+/* =========================
+   PC（1025px以上）
+========================= */
+@media (min-width: 1025px){
+
+    #game{
+        max-width:600px;
+        margin-top:40px;
+        padding-bottom:0;
+    }
+
+    .keypad{
+        position:static;
+        margin-top:20px;
+        grid-template-columns:repeat(3,120px);
+        justify-content:center;
+    }
+
+    button{
+        padding:20px;
+        font-size:20px;
+    }
+}
+    
 </style>
 </head>
 
