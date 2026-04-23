@@ -13,22 +13,10 @@ body{
     margin:0;
 }
 
-/* ダブルタップズーム防止 */
-html, body {
-    touch-action: manipulation;
-}
-
-/* ボタンのズーム・選択防止 */
-button {
-    touch-action: manipulation;
-    user-select: none;
-}
-
-/* ←これ追加：キーパッド分の余白 */
+/* 共通 */
 #game{
     max-width:420px;
     margin:auto;
-    padding-bottom:220px;
 }
 
 #question{
@@ -44,23 +32,10 @@ button {
     min-height:40px;
 }
 
-/* ←ここが重要：固定キーパッド */
 .keypad{
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    max-width:420px;
-    margin:auto;
-    right:0;
-
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:6px;
-
-    background:#000;
-    padding:10px;
-    border-top:2px solid #0ff;
 }
 
 button{
@@ -83,7 +58,71 @@ button:active{
 
 #info{
     margin:5px;
+}
 
+/* =========================
+   スマホ（〜768px）
+========================= */
+@media (max-width: 768px){
+
+    #game{
+        padding-bottom:220px;
+    }
+
+    .keypad{
+        position:fixed;
+        bottom:0;
+        left:0;
+        right:0;
+        max-width:420px;
+        margin:auto;
+        background:#000;
+        padding:10px;
+        border-top:2px solid #0ff;
+    }
+}
+
+/* =========================
+   タブレット（769px〜1024px）
+========================= */
+@media (min-width: 769px) and (max-width: 1024px){
+
+    #game{
+        max-width:500px;
+    }
+
+    .keypad{
+        position:static;
+        margin-top:20px;
+    }
+
+    button{
+        padding:18px;
+        font-size:20px;
+    }
+}
+
+/* =========================
+   PC（1025px以上）
+========================= */
+@media (min-width: 1025px){
+
+    #game{
+        max-width:600px;
+        margin-top:40px;
+    }
+
+    .keypad{
+        position:static;
+        margin-top:20px;
+        grid-template-columns:repeat(3,120px);
+        justify-content:center;
+    }
+
+    button{
+        padding:20px;
+        font-size:20px;
+    }
 }
 </style>
 </head>
